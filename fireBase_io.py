@@ -1,29 +1,26 @@
 from firebase import firebase  
 import json
-
-firebase = firebase.FirebaseApplication('https://debunk-the-myths.firebaseio.com/', None)  
-
-data = {'Members':[{'Name':'Sudhanva','cec':'sudng'},{'Name':'Nikitha','cec':'ninagell'}]}
-
-#print(json.dumps(data, indent=4))
-
-# data = 
-
-# 		 { 
-# 		  'Name': 'Sudhanva',  
-#           'id': 1,  
-#           'cec': 'sudng' 
-#           }  
+import sys
 
 
-# # Write to databse
+class db:
+	def __init__(self, url):
+		self.handler = firebase.FirebaseApplication(url, None)
 
-# result = firebase.post('/test/',data)
+	def write(self,dest,data):
+		result = self.handler.post(dest,data)
+		return result
+
+
+	def read(self,dest,obj):
+		result = self.handler.get(dest, obj)
+		return (result)
+
+# mydb = db('https://debunk-the-myths.firebaseio.com/')
+# result = mydb.read('/test/-M6GZph798ThetACfTBN/Members/1/','Name')
+
+# data = {'Members':[{'Name':'Sudhanva','cec':'sudng'},{'Name':'Nikitha','cec':'ninagell'}]}
+# result = mydb.write('/test/test1',data)
+
 # print(result)
 
-# #Read from databse 
-result = firebase.get('/test/-M6GZph798ThetACfTBN/Members/1/','Name')
-
-print(type(result))
-
-print(result) 

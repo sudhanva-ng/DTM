@@ -1,3 +1,4 @@
+from fireBase_io import db
 import sys
 import json
 import requests
@@ -6,6 +7,7 @@ from requests.auth import HTTPBasicAuth
 
 
 token = 'c6c56744857247b0a185ae62a5953cf2'
+db_url = 'https://debunk-the-myths.firebaseio.com/'
 
 
 def get_url(query,token):
@@ -23,15 +25,24 @@ def send_api(url,token):
 	except Exception as e:
 		print(e)
 
+#firebase db
+mydb = db('https://debunk-the-myths.firebaseio.com/')
+
+
 url = get_url('covid-19 India', token)
 result = send_api(url, token)
 
-#result = json.dumps(result, indent=4)
 
-with open ('news.json','a') as fh:
-	fh.write(json.dumps(result, indent=4))
+if result['status']=='ok':
+	for items in result['articles']:
+		mydb.write('/test/titles',items['title'])
+		#print (items['title'])
 
-print ('Done!')
+
+# with open ('news.json','a') as fh:
+# 	fh.write(json.dumps(result, indent=4))
+
+# print ('Done!')
 
 
 
