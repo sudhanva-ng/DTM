@@ -6,10 +6,13 @@ import os
 from requests.auth import HTTPBasicAuth
 from newsapi import NewsApiClient
 from newspaper import Article
+import re
 
 
 token = 'c6c56744857247b0a185ae62a5953cf2'
 db_url = 'https://debunk-the-myths.firebaseio.com/'
+
+filtering_key = ['india', 'covid', ]
 
 class newsob:
 	def __init__(self,id):
@@ -52,14 +55,16 @@ def getNewsId(items):
 
 newsapi = NewsApiClient(api_key=token)
 
+
+## Initial query to get bunch of articles, urls'e etc (step 1) from newapi.org
+
+## To do - filter query based on sources
 all_articles = newsapi.get_everything(q='covid india',
-                                      from_param='2020-05-10',
+                                      from_param='2020-05-15',
+                                      sources='bbc-news,cbc-bews,cnn,fox-nees,google-news-in,the-times-of-india,the-hindu',
                                       language='en',
                                       sort_by='relevancy',
                                       page=1)
-
-#print(json.dumps(all_articles, indent=2))
-
 
 
 articleCollection = []
@@ -77,8 +82,22 @@ if all_articles['status']=="ok":
 
 		print('Trying for %s'%newsid)
 
+		## get ful contnet for an article using url using 'newspaper' python module
 		full_text = get_full_text(news.url)
-		if full_text !=None:
+		if full_text==None:
+			continue
+
+		## filtering logic using keywords
+		fail = 0
+		for words in filtering_key:
+			if re.search(words, full_text, re.IGNORECASE):
+				continue
+			else:
+				fail = 1
+				break
+
+
+		if full_text !=None and fail!=1:
 			news.text = full_text
 			articleCollection.append(news)
 		else:
@@ -86,16 +105,19 @@ if all_articles['status']=="ok":
 
 
 
+
 mydb = db('https://debunk-the-myths.firebaseio.com/')
 
+print(len(articleCollection))
+
 for items in articleCollection:
+	print('!!!!')
 	items.viewArticle()
 	#mydb.write('/test/articles',items.formatArticletoDb())
 	out = items.formatArticletoDb()
-	print(out)
-	print(type(out))
 
 	result = mydb.write('/test/articles',out)
+	print (result)
 
 
 
